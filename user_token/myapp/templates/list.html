@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+  <script src="https://code.jquery.com/jquery-3.5.1.js" integrity="sha256-QWo7LDvxbWT2tbbQ97B53yJnYU3WhH/C8ycbRAkjPDc=" crossorigin="anonymous"></script>
+<style>
+    table {
+        font-family: arial, sans-serif;
+        border-collapse: collapse;
+        width: 100%;
+      }
+      
+      td, th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+      
+      tr:nth-child(even) {
+        background-color: #dddddd;
+      }
+      
+      .pagination {
+        margin-top: 1em;
+    }
+    
+    .pagination a {
+        text-decoration: none;
+    }
+    
+    .pagination-number {
+        padding: 0.5em 0.8em;
+        border-radius: 2px;
+        color: #fff;
+        background-color: #6D85C7;
+        margin-inline :5px;
+    }
+    
+    .pagination-number:hover,
+    .pagination-current {
+        background-color: #3354AA;
+    }
+   
+    
+    .pagination-action:hover,
+    .pagination-previous,
+    .pagination-next {
+        color: #3354AA;
+    }
+
+</style>
+
+<body>
+    
+
+
+<form method="post" action = "export/" enctype="multipart/form-data">
+    {% csrf_token %}
+    <h3>Please select format of file.</h3>
+    <select name="file-format" class="form-control  my-3" style= "width:300px;">
+        <option selected>Choose format...</option>
+        <option>CSV</option>
+        <option>PDF</option>
+      </select>
+    <button class="btn btn-primary" type="submit">Download</button>
+  </form>
+<br>
+
+
+    <label for="">Choose a number:</label>
+    
+    <select name="dropdown" id = "dropdown" onchange="location = this.value; ">
+      <option value="">{{recs}}</option>
+        <option  value="?page={{ i }}&rec=5" >5</option>
+        <option value="?page={{ i }}&rec=10" >10</option>
+        <option value="?page={{ i }}&rec=20" >20</option>
+        <option value="?page={{ i }}&rec=30" >30</option>
+        <option value="?page={{ i }}&rec=50" >50</option>
+        <option value="?page={{ i }}&rec=100" >100</option>
+        
+    </select>
+  
+    
+<table class="table table-bordered">
+    <thead>
+      <tr>
+        <th  style="width: 50px;">No.</th>
+        <th  style="width: 150px;">Username</th>
+        <th  style="width: 150px;">Mobile</th>
+        <th  style="width: 100px;">Permission</th>
+        <th>Token</th>
+      </tr>
+    </thead>
+    <tbody>
+        
+        {% for user in page_obj %}
+       
+        <tr>
+          
+          <td>{{ forloop.counter0|add:page_obj.start_index }}</td> 
+          <td>{{ user.0 }}</td>
+          <td>{{ user.1 }}</td>
+          <td>{{ user.2 }}</td>
+          <td>{{ user.3 }}</td>
+        </tr>
+
+      {% endfor %}
+      {% comment %} {% for user in page_obj %}
+        <tr>
+          <td>{{ user.user }}</td>
+          <td>{{ user.mobile }}</td>
+          <td>{{ user.permission }}</td>
+        </tr>
+      {% endfor %} {% endcomment %}
+    </tbody>
+  </table> 
+
+  
+
+  <div class="pagination">
+  {% if page_obj.has_other_pages %}
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+      <li><a  class="page-link"  href="?page={{ page_obj.previous_page_number }}&rec={{ recs }}">&laquo;</a></li>
+    {% else %}
+    <li class="page-item disabled">
+      <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&laquo;</a>
+  </li>
+  {% endif %}
+
+
+    {% for i in page_obj.paginator.page_range %}
+      {% if page_obj.number == i %}
+    <li class="page-item active" aria-current="page">
+<span class="page-link">
+    {{ i }}
+    <span class="sr-only">(current)</span>
+</span>
+</li>
+{% elif i > page_obj.number|add:'-5' and i < page_obj.number|add:'5' %}
+    {% if recs %}
+        <li class="page-item"><a class="page-link" href="?page={{ i }}&rec={{ recs }}">{{ i }}</a></li>
+    {% else %}
+        <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+    {% endif %}
+{% endif %}
+    {% endfor %}
+
+    {% if page_obj.paginator.num_pages > page_obj.number|add:'4' %}
+        {% if recs %}
+          <li class="page-item"><a class="page-link" href="?page={{ page_obj.number|add:'5' }}&rec={{ recs }}">&hellip;</a></li>
+        {% else %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.number|add:'5' }}">&hellip;</a></li>
+        {% endif %}
+    {% endif %}
+
+
+    {% if page_obj.has_next %}
+    <li class="page-item">
+      {% if recs %}
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}&rec={{ recs }}">&raquo;</a>
+      {% else %}
+      <a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a>
+      {% endif %}
+  
+    </li>
+    {% else %}
+    <li class="page-item disabled">
+      <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&raquo;</a>
+  </li>
+  {% endif %}
+  </ul>
+</div>
+{% endif %}
+
+<b><p>Total No.of records :{{total}}</p></b>
+</body>
+</html>
+
